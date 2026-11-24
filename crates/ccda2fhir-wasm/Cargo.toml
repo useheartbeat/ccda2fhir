@@ -12,6 +12,11 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+# The WebAssembly build is a program, not a dependency, so it keeps decimals exactly as written.
+default = ["arbitrary_precision"]
+arbitrary_precision = ["ccda2fhir/arbitrary_precision"]
+
 [dependencies]
 ccda2fhir = { path = "../ccda2fhir", version = "0.1.2" }
 ccda-map.workspace = true

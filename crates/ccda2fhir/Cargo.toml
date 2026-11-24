@@ -11,6 +11,10 @@ rust-version.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[features]
+# Keep decimals exactly as written. See `ccda-map`'s feature of the same name.
+arbitrary_precision = ["ccda-map/arbitrary_precision"]
+
 [dependencies]
 ccda-model.workspace = true
 ccda-terminology.workspace = true

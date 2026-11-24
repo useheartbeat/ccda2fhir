@@ -63,6 +63,25 @@ let options = Options {
 | `limits` | 50 MiB, 5,000,000 nodes, depth 256 | Input safety limits applied while parsing. Exceeding one is a `ConvertError`, not a crash. |
 | `loinc` | `None` | A `LoincTable` (from your own LOINC download) that sets each result's category. Without it results are laboratory. |
 
+## Cargo features
+
+| Feature | Default | Meaning |
+|---|---|---|
+| `arbitrary_precision` | off | Decimals keep their written precision (`5.40` stays `5.40`). Without it they are `f64` numbers, so trailing zeros are dropped (`5.4`). |
+
+`arbitrary_precision` turns on `serde_json`'s feature of the same name. Cargo enables a feature for every crate in a
+build that uses `serde_json`, not just this one, and with it numbers can no longer be deserialized through buffered
+serde paths (internally tagged and untagged enums, `#[serde(flatten)]`) in those crates. A FHIR model whose resources
+are an enum tagged by `resourceType` fails on any bundle holding a decimal. Turn the feature on only when nothing else
+in your build deserializes numbers that way:
+
+```toml
+[dependencies]
+ccda2fhir = { git = "https://github.com/alvinhenrick/ccda2fhir", features = ["arbitrary_precision"] }
+```
+
+The `ccda2fhir` command line tool, HTTP service and WebAssembly build turn it on.
+
 ## Errors
 
 `ConvertError::Parse` means the input is too large, not UTF-8, not well-formed XML, has a `DOCTYPE`, or is not a

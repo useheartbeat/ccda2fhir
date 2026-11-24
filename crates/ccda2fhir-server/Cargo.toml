@@ -16,6 +16,9 @@ name = "ccda2fhir"
 path = "src/main.rs"
 
 [features]
+# The service and command line are programs, not dependencies, so they keep decimals exactly as written.
+default = ["arbitrary_precision"]
+arbitrary_precision = ["ccda2fhir/arbitrary_precision"]
 # Export traces over OTLP when OTEL_EXPORTER_OTLP_ENDPOINT is set. Off by default; the container image turns it on.
 otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp", "dep:tracing-opentelemetry"]
 

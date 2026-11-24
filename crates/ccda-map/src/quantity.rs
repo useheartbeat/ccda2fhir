@@ -1,8 +1,9 @@
 //! C-CDA `PQ` to FHIR `Quantity` / `Age`.
 //!
-//! FHIR decimals keep their written precision (`5.40` is not `5.4`), so numbers are copied from
-//! the source text, never round-tripped through a float. That relies on `serde_json`'s
-//! `arbitrary_precision` feature.
+//! Numbers are validated against the FHIR decimal grammar, then parsed into a JSON number. By
+//! default that number is an `f64`, so trailing zeros are dropped (`5.40` becomes `5.4`). With the
+//! `arbitrary_precision` feature, which turns on `serde_json`'s feature of the same name, the
+//! number keeps the source text and FHIR decimals keep their written precision.
 
 use ccda_model::Quantity;
 use serde_json::{json, Map, Number, Value};
@@ -23,7 +24,8 @@ fn is_decimal(text: &str) -> bool {
     digits(int) && frac.is_none_or(digits)
 }
 
-/// A FHIR decimal number with the source's precision, or `None` if `text` is not a decimal.
+/// A FHIR decimal number, or `None` if `text` is not a decimal. It keeps the source's precision
+/// only with the `arbitrary_precision` feature.
 #[must_use]
 pub fn decimal(text: &str) -> Option<Number> {
     let text = text.strip_prefix('+').unwrap_or(text);
@@ -129,6 +131,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "arbitrary_precision")]
     fn keeps_decimal_precision() {
         let mut report = Report::default();
         let v = map_quantity(&q("5.40", Some("mg/dL")), &mut report).unwrap();
@@ -137,6 +140,18 @@ mod tests {
         assert_eq!(v["code"], "mg/dL");
         // Written precision survives: 5.40, not 5.4.
         assert_eq!(v["value"].to_string(), "5.40");
+        assert!(report.issues.is_empty());
+    }
+
+    #[test]
+    #[cfg(not(feature = "arbitrary_precision"))]
+    fn decimals_become_numbers() {
+        let mut report = Report::default();
+        let v = map_quantity(&q("5.40", Some("mg/dL")), &mut report).unwrap();
+        assert_eq!(v["unit"], "mg/dL");
+        assert_eq!(v["system"], "http://unitsofmeasure.org");
+        assert_eq!(v["code"], "mg/dL");
+        assert_eq!(v["value"], 5.4);
         assert!(report.issues.is_empty());
     }
 

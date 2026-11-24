@@ -347,6 +347,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "arbitrary_precision")]
     fn decimals_keep_their_written_precision() {
         let (out, _) = run(&doc(
             "",
@@ -358,6 +359,23 @@ mod tests {
             ),
         ));
         assert!(serde_json::to_string(&out).unwrap().contains("5.40"));
+    }
+
+    #[test]
+    #[cfg(not(feature = "arbitrary_precision"))]
+    fn decimal_values_become_numbers() {
+        let (out, _) = run(&doc(
+            "",
+            &member(
+                "1-1",
+                "completed",
+                r#"<value xsi:type="PQ" value="5.40" unit="mg"/>"#,
+                "20240101",
+            ),
+        ));
+        assert!(serde_json::to_string(&out)
+            .unwrap()
+            .contains(r#""value":5.4"#));
     }
 
     #[test]
