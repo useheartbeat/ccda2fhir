@@ -21,7 +21,11 @@ Every clinical domain in C-CDA is a nest of the same few elements (`act`, `obser
   one input; not stable across edits to the document. A content-derived scheme can replace it
   behind `Context::next_id`.
 - **Decimals keep their written precision** (`5.40` stays `5.40`) via `serde_json`'s
-  `arbitrary_precision`. Exponent forms are rejected (not valid FHIR decimals).
+  `arbitrary_precision`, behind the library's `arbitrary_precision` feature. Cargo turns that
+  feature on for every crate in a consumer's build, where it breaks deserializing numbers through
+  buffered serde paths (tagged enums), so the library leaves it off by default and decimals are
+  `f64` (`5.4`). The command line tool, service and WebAssembly build turn it on. Exponent forms
+  are rejected (not valid FHIR decimals).
 - **Selection by template, category by section code.** Condition mapping starts at Problem Concern
   Acts (`2.16.840.1.113883.10.20.22.4.3`) and Problem Observations (`...4.4`), both confirmed in the
   IG example. The category comes from the section's LOINC code per `CF-ProblemCategory`.

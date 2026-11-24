@@ -11,6 +11,13 @@ rust-version.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[features]
+# Keep decimals exactly as written (`5.40` stays `5.40`) through `serde_json`'s `arbitrary_precision`.
+# Off by default: Cargo enables a feature for every crate in a build that uses `serde_json`, and
+# `arbitrary_precision` breaks deserializing numbers through buffered serde paths (internally
+# tagged and untagged enums, `flatten`) in those crates.
+arbitrary_precision = ["serde_json/arbitrary_precision"]
+
 [dependencies]
 ccda-model.workspace = true
 ccda-terminology.workspace = true

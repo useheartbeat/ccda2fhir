@@ -771,11 +771,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "arbitrary_precision")]
     fn exact_decimals_are_kept() {
         let body = format!(r#"<doseQuantity value="0.50" unit="mg"/>{DRUG}"#);
         let (out, _, _) = run(&document("EVN", "", &body));
         let text = serde_json::to_string(&out[0]).unwrap();
         assert!(text.contains("0.50"));
+    }
+
+    #[test]
+    #[cfg(not(feature = "arbitrary_precision"))]
+    fn decimal_doses_become_numbers() {
+        let body = format!(r#"<doseQuantity value="0.50" unit="mg"/>{DRUG}"#);
+        let (out, _, _) = run(&document("EVN", "", &body));
+        let text = serde_json::to_string(&out[0]).unwrap();
+        assert!(text.contains(r#""value":0.5"#));
     }
 
     #[test]

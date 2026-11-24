@@ -155,7 +155,11 @@ locally: `scripts/build-wasm.sh web && scripts/build-site.sh`, then serve `targe
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
+cargo test -p ccda-map -p ccda2fhir
 ```
+
+`cargo test --workspace` builds with the `arbitrary_precision` feature, which the server and WebAssembly crates turn on.
+The second run tests the library's default, without it.
 
 New to Rust? [`LESSONS/`](LESSONS) walks through the code step by step.
 
